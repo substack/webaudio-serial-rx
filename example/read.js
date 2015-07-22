@@ -6,7 +6,7 @@ getmedia({ audio: true }, function (err, stream) {
     if (err) return console.error(err);
     var Context = global.AudioContext || global.webkitAudioContext;
     var context = new Context;
-    var win = context.sampleRate / 9600;
+    var win = context.sampleRate / 4800;
     var mstream = context.createMediaStreamSource(stream);
     var unpack = unpacker({ polarity: 1 });
     unpack.pipe(through(function (buf, enc, next) {
@@ -17,7 +17,7 @@ document.body.appendChild(document.createTextNode(buf.toString() + ' '));
     
     var sproc = context.createScriptProcessor(2048, 1, 1);
     sproc.addEventListener('audioprocess', onaudio);
-    var MIN = 0.01;
+    var MIN = 0.001;
     var bytev = 0;
     var bytepos = 0;
     
@@ -34,6 +34,7 @@ var bits = [];
         
         for (var i = 1; i < input.length; i++) {
             if (Math.abs(input[i]) < MIN) {
+bits.push('X'); 
                 prev = null;
                 continue;
             }
@@ -43,7 +44,7 @@ var bits = [];
                 last = i;
                 continue;
             }
-bits.push(cur); 
+bits.push(cur);
             
             if (cur ^ prev) {
                 var dist = i - last;
@@ -62,6 +63,6 @@ bits.push(cur);
             prev = cur;
         }
         if (bytes.length) unpack.write(Buffer(bytes));
-console.log(bits.join('')); 
+if (/[01]/.test(bits.join(''))) console.log(bits.join('')); 
     }
 });
